@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="E0000">암호화에 실패하였습니다.</entry>
+	<entry key="E0001">검증에 실패하였습니다.</entry>
+	<entry key="E0002">결제비밀번호 조회에 실패하였습니다.</entry>
+	<entry key="E0003">복호화에 실패하였습니다.</entry>
+	<entry key="E0004">결제 비밀번호 인증 불가</entry>
+	<entry key="E0006">선행프로세스 검증 실패하였습니다.</entry>
+	<entry key="E0007">DB 조회에 실패하였습니다.</entry>
+	<entry key="E0008">결제수단 정보 조회에 실패하였습니다.</entry>
+	<entry key="E0009">결제 비밀번호 정보 조회에 실패하였습니다.</entry>
+	<entry key="E0010">결제수단OTC발급요청 조회에 실패하였습니다.</entry>
+	<entry key="E0011">결제승인요청 조회에 실패하였습니다.</entry>
+	<entry key="E0013">결제승인정보 검증에 실패하였습니다.</entry>
+	<entry key="E0014">취소승인정보 저장에 실패하였습니다.</entry>
+	
+	<entry key="E1000">가맹점 정보 조회에 실패하였습니다.</entry>
+	<entry key="E1001">승인 정보 조회에 실패하였습니다.</entry>
+	<entry key="E1002">FDS수집정보 조회에 실패하였습니다.</entry>
+	<entry key="E1003">결제요청정보 저장에 실패하였습니다.</entry>
+	<entry key="E1004">결제수단인증정보 저장에 실패하였습니다.</entry>
+	<entry key="E1005">승인정보 저장에 실패하였습니다.</entry>
+	<entry key="E1006">FDS수집정보 저장에 실패하였습니다.</entry>
+</properties>
