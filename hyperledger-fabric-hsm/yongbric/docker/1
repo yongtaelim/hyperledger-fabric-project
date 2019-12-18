@@ -1,0 +1,37 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  basic:
+
+services:
+  orderer.example.com:
+    container_name: orderer.example.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer/msp
+      - SOFTHSM2_CONF=/etc/hyperledger/fabric/softhsm/config/softhsm2.conf  
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    ports:
+      - 7050:7050
+    volumes:
+        - ../config/:/etc/hyperledger/configtx
+        - ../crypto-config/ordererOrganizations/example.com/:/etc/hyperledger/msp/orderer
+        - ../crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1  
+        - ./orderer/orderer.yaml:/etc/hyperledger/fabric/orderer.yaml
+        - ./orderer/msp/:/etc/hyperledger/fabric/msp
+        - /home/ubuntu/yongbric/softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf  
+        - /usr/local/lib/softhsm/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
+        - /home/ubuntu/yongbric/softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens  
+    networks:
+      - basic
