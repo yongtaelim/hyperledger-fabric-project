@@ -23,16 +23,45 @@ NODES=orderer peer cli
 CONFIGS=genesis-block channel-transaction
 CHANNEL_INVOCATIONS=create join
 
-export PATH=${PWD}/bin:$PATH
-
 test:
-	@echo $(patsubst %,generate-%,$(MSPS))
+	@echo "test parameter $(ID)..."
 
 all: setenv ca-start ca-enroll $(patsubst %,generate-%,$(MSPS)) $(patsubst %,generate-%,$(CONFIGS)) $(patsubst %,%-start,$(NODES)) $(patsubst %,channel-%,$(CHANNEL_INVOCATIONS))
 
 generate-msp: setenv ca-enroll generate-orderer-admin generate-peer-admin generate-peer-user
 
 generate-msp-not-ca: setenv generate-orderer-admin generate-peer-admin generate-peer-user	
+
+softhsm: 
+	
+
+install-base:	
+	@echo "install softhsm2 require package..."
+	apt update	
+	apt install botan gcc libssl-dev openssl make
+
+install-softhsm:
+	@echo "install softhsm2..."
+	cd softhsm
+	wget https://dist.opendnssec.org/source/softhsm-2.5.0.tar.gz
+	tar -xzf softhsm-2.5.0.tar.gz
+	cd softhsm-2.5.0
+	./configure --disable-gost
+	make
+	make install
+
+softhsm-show-slots:
+	@echo "softhsm show slots..."
+	@softhsm2-util --show-slots
+
+softhsm-init-token:
+	@echo "softhsm init token..."
+	@softhsm2-util --init-token --slot 0 --label "ForFabric" --so-pin 1234 --pin 98765432
+
+softhsm-env:
+	@echo "set softhsm env..."
+	cp /usr/local/lib/softhsm/libsofthsm2.so ${PWD}/softhsm/lib/.
+	cp -r /var/lib/softhsm/tokens ${PWD}/softhsm/.
 
 ca-start:
 	@echo "fabric ca server start..."
@@ -188,7 +217,7 @@ clean-msp:
 .PHONY: clean-container
 clean-container:
 	@echo "clean the container.."
-	docker rm -f $$(docker ps -aq)
+	docker rm -f fabric-ca-server orderer.example.com peer0.org1.example.com cli
 
 .PHONY: clean-config
 clean-config:
