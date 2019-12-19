@@ -1,64 +1,6 @@
 # hyperledger-fabric-hsm
 hyperledger fabric hsm 적용 테스트
 
-## softhsm2 설치
-### 사전 작업
-1. openssl
-```
-apt update
-apt install openssl
-```
-2. botan 설치
-```
-apt update
-apt install botan
-```
-### softhsm
-1. download
-```
-wget https://dist.opendnssec.org/source/softhsm-2.5.0.tar.gz
-```
-2. tar 압축 해제
-```
-tar -xzf softhsm-2.5.0.tar.gz
-```
-3. configure 실행
-```
-./configure --disable-gost
-```
-4. make 
-```
-make
-
-make install
-```
-5. check
-정상적으로 설치가 됐는지 체크한다. softhsm의 slot list를 불러온다.
-```
-softhsm2-util --show-slots
-```
-정상적으로 설치가 완료되었다면 아래의 경로에 관련 파일 및 폴더 생성
-```
-## so file
-/usr/local/lib/softhsm/libsofthsm2.so
-## token folder
-/var/lib/softhsm/tokens/
-## config file
-/etc/softhsm2.conf
-
-export SOFTHSM2_CONF="/etc/softhsm2.conf"
-```
-6. init-token
-hyperledger fabric에 필요한 token을 생성한다. ( hyperledger fabric document criteria )
-```
-softhsm2-util --init-token --slot 0 --label "ForFabric" --so-pin 1234 --pin 98765432
-```
-description)  
->--slot :: 추가할 slot 넘버를 입력한다. 현재 2번 slot까지 등록이 되있고 3번에 추가를 원할 경우 '3'을 입력한다.  
->--label :: DB로 비교해봤을 경우 table이라고 생각하면 된다.  
->--so-pin :: 관리자 비밀번호  
->--pin :: user 비밀번호
-
 ## hyerperledger fabric node docker image 생성
 ### fabric-ca 
 1. fabric ca 소스 clone
@@ -120,21 +62,16 @@ ENV GODEBUG netdns=go
 
 ## hyperledger fabric network compose
 ### yongbric clone :)
-1. yongbric을 clone 받는다.
+yongbric을 clone 받는다.
 ```
-cd
-## yongbric clone.
-git clone TODO.... 여기에 yongbric url 입력
-## softhsm2 token 폴더 복사 or 이동
-cd yongbric/softhsm
-## work on a softhsm default tokens path
-sudo cp -r /var/lib/softhsm/tokens/ ~/yongbric/softhsm/
+1. git init fabric-hsm
+2. cd fabric-hsm
+3. git config core.sparseCheckout true
+4. git remote add -f origin https://github.com/yongtaelim/hyperledger-fabric-project.git
+5. echo "hyperledger-fabric-hsm/yongbric" >> .git/info/sparse-checkout
+6. git pull origin master
 ```
-2. 환경 변수 설정
-Makefile 내부에 설정하려 했으나 Permission denied ㅠ 좀 더 찾아보자...
-```
-export PATH=~/yongbric/bin:$PATH
-```
+
 ### all
 make를 이용하여 아래의 항목을 실행한다.
 ```
@@ -146,6 +83,65 @@ description)
 >>orderer-admin : $(ID)ordereradmin / $(ID)ordereradminpw
 >>peer-admin : $(ID)peeradmin / $(ID)peeradminpw
 >>peer-user : $(ID)peeruser / $(ID)peeruserpw
+
+### softhsm2 설치
+#### 사전 작업
+1. openssl
+```
+apt update
+apt install openssl
+```
+2. botan 설치
+```
+apt update
+apt install botan
+```
+#### softhsm
+1. download
+```
+wget https://dist.opendnssec.org/source/softhsm-2.5.0.tar.gz
+```
+2. tar 압축 해제
+```
+tar -xzf softhsm-2.5.0.tar.gz
+```
+3. configure 실행
+```
+./configure --disable-gost
+```
+4. make 
+```
+make
+
+make install
+```
+5. check
+정상적으로 설치가 됐는지 체크한다. softhsm의 slot list를 불러온다.
+```
+softhsm2-util --show-slots
+```
+정상적으로 설치가 완료되었다면 아래의 경로에 관련 파일 및 폴더 생성
+```
+## so file
+/usr/local/lib/softhsm/libsofthsm2.so
+## token folder
+/var/lib/softhsm/tokens/
+## config file
+/etc/softhsm2.conf
+
+export SOFTHSM2_CONF="/etc/softhsm2.conf"
+```
+6. init-token
+hyperledger fabric에 필요한 token을 생성한다. ( hyperledger fabric document criteria )
+```
+softhsm2-util --init-token --slot 0 --label "ForFabric" --so-pin 1234 --pin 98765432
+```
+description)  
+>--slot :: 추가할 slot 넘버를 입력한다. 현재 2번 slot까지 등록이 되있고 3번에 추가를 원할 경우 '3'을 입력한다.  
+>--label :: DB로 비교해봤을 경우 table이라고 생각하면 된다.  
+>--so-pin :: 관리자 비밀번호  
+>--pin :: user 비밀번호
+
 ### ca server start
 fabric ca server를 시작한다.
 1. docker-compose-ca.yaml
@@ -162,9 +158,9 @@ fabric-ca-server:
      - SOFTHSM2_CONF=/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
    volumes:
      - ./ca:/etc/hyperledger/fabric-ca-server
-     - ~/yongbric/softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
-     - ~/yongbric/softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
-     - /usr/local/lib/softhsm/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
+     - ../softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
+     - ../softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
+     - ../softhsm/lib/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
    command: sh -c 'fabric-ca-server start -b admin:adminpw'
 ```
 2. fabric-ca-server-config.yaml
@@ -232,9 +228,9 @@ services:
         - ../crypto-config/ordererOrganizations/ordererorg/:/etc/hyperledger/msp/orderer
         - ./orderer/orderer.yaml:/etc/hyperledger/fabric/orderer.yaml
         - ./orderer/msp/:/etc/hyperledger/fabric/msp
-        - /home/ubuntu/yongbric/softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
-        - /usr/local/lib/softhsm/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
-        - /home/ubuntu/yongbric/softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
+        - ../softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
+        - ../softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
+        - ../softhsm/lib/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
 ```
 2. orderer.yaml
 ```
@@ -302,9 +298,9 @@ services:
         - ./peer/core.yaml:/etc/hyperledger/fabric/core.yaml
         - ./peer/msp/:/etc/hyperledger/fabric/msp
         - ../chaincode/:/opt/gopath/src/github.com/chaincode
-        - /home/ubuntu/yongbric/softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
-        - /usr/local/lib/softhsm/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
-        - /home/ubuntu/yongbric/softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
+        - ../softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
+        - ../softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
+        - ../softhsm/lib/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
 
     depends_on:            
       - couchdb
@@ -366,11 +362,9 @@ services:
         - ./../chaincode/:/opt/gopath/src/github.com/chaincode
         - ./../crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
         - ./cli/:/etc/hyperledger/fabric
-        - /home/ubuntu/yongbric/softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
-        - /usr/local/lib/softhsm/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so
-        - /home/ubuntu/yongbric/softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
-          #    networks:
-          #        - basic
+        - ../softhsm/config/softhsm2.conf:/etc/hyperledger/fabric/softhsm/config/softhsm2.conf
+        - ../softhsm/tokens/:/etc/hyperledger/fabric/softhsm/tokens
+        - ../softhsm/lib/libsofthsm2.so:/etc/hyperledger/fabric/libsofthsm2.so          
 ```
 2. core.yaml, orderer.yaml
 peer node start, orderer node start 와 동일
